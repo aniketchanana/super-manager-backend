@@ -3,14 +3,14 @@ import { ERole } from '@/config/constant';
 import { ChildAccount } from '@/models/ChildAccount';
 import { IUser, User } from '@/models/User';
 import { AuthRequest } from '@/types';
-import { type NextFunction, type Request, type Response } from 'express';
+import { type NextFunction, type Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 interface JwtPayload {
   email: string;
 }
 
-export const protect = async (
+export const protectAdmin = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -35,8 +35,7 @@ export const protect = async (
       email: decoded.email,
       token,
     }).select('-password');
-
-    if (!user) {
+    if (!user || user.role !== ERole.ADMIN) {
       res.status(401).json({ message: 'Not authorized, user not found' });
       return;
     }
@@ -47,6 +46,7 @@ export const protect = async (
     res.status(401).json({ message: 'Not authorized, token failed' });
   }
 };
+
 export const protectChildAccount = async (
   req: AuthRequest,
   res: Response,
@@ -73,7 +73,7 @@ export const protectChildAccount = async (
       token,
     }).select('-password');
 
-    if (!childAccount) {
+    if (!childAccount || childAccount.role === ERole.ADMIN) {
       res.status(401).json({ message: 'Not authorized, user not found' });
       return;
     }
@@ -82,17 +82,5 @@ export const protectChildAccount = async (
     next();
   } catch (error) {
     res.status(401).json({ message: 'Not authorized, token failed' });
-  }
-};
-
-export const admin = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  if (req.user && req.user.role === ERole.ADMIN) {
-    next();
-  } else {
-    res.status(403).json({ message: 'Not authorized as admin' });
   }
 };

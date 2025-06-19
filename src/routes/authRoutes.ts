@@ -7,15 +7,15 @@ import {
   logoutChildAccount,
   registerAdmin,
 } from '@/controllers/auth/authController';
-import { protect, protectChildAccount } from '@/middleware/auth';
+import { protectAdmin, protectChildAccount } from '@/middleware/auth';
 import express from 'express';
 
 const router = express.Router();
 
 router.post(authEndpoints.register, registerAdmin);
 router.post(authEndpoints.login, login);
-router.get(authEndpoints.profile, protect, getProfile);
-router.post(authEndpoints.logout, protect, logout);
+router.get(authEndpoints.profile, protectAdmin, getProfile);
+router.post(authEndpoints.logout, protectAdmin, logout);
 router.post(authEndpoints.loginChildAccount, loginChildAccount);
 router.post(
   authEndpoints.logoutChildAccount,

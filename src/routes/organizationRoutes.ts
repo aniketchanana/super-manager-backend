@@ -2,16 +2,18 @@ import { orgEndpoints } from '@/config/apiEndpoints';
 import {
   addNewMemberToOrg,
   createOrg,
+  deactivateMember,
   getOrg,
   updateOrg,
 } from '@/controllers/org/organizationController';
-import { admin, protect } from '@/middleware/auth';
+import { protectAdmin } from '@/middleware/auth';
 import express from 'express';
 
 const router = express.Router();
-router.get(orgEndpoints.get, protect, admin, getOrg);
-router.post(orgEndpoints.create, protect, admin, createOrg);
-router.patch(orgEndpoints.update, protect, admin, updateOrg);
-router.post(orgEndpoints.addMember, protect, admin, addNewMemberToOrg);
+router.get(orgEndpoints.get, protectAdmin, getOrg);
+router.post(orgEndpoints.create, protectAdmin, createOrg);
+router.patch(orgEndpoints.update, protectAdmin, updateOrg);
+router.post(orgEndpoints.addMember, protectAdmin, addNewMemberToOrg);
+router.post(orgEndpoints.deactivateMember, protectAdmin, deactivateMember);
 
 export default router;

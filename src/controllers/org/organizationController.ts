@@ -79,4 +79,20 @@ const addNewMemberToOrg = async (req: Request, res: Response) => {
   }
 };
 
-export { addNewMemberToOrg, createOrg, getOrg, updateOrg };
+const deactivateMember = async (req: Request, res: Response) => {
+  try {
+    const { memberId } = req.body;
+    const updatedMember = await ChildAccount.findByIdAndUpdate(
+      memberId,
+      { isActive: false },
+      { new: true }
+    );
+    return res.status(200).json(updatedMember);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: 'Something went wrong, unable to deactivate member' });
+  }
+};
+
+export { addNewMemberToOrg, createOrg, deactivateMember, getOrg, updateOrg };
