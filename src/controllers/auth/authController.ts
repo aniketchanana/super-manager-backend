@@ -1,14 +1,8 @@
-import config from '@/config/config';
 import { ERole } from '@/config/constant';
+import { ChildAccount } from '@/models/ChildAccount';
 import { User } from '@/models/User';
+import { generateToken } from '@/utils/app.utils';
 import { type Request, type Response } from 'express';
-import jwt from 'jsonwebtoken';
-
-const generateToken = (email: string): string => {
-  return jwt.sign({ email }, config.jwtSecret as jwt.Secret, {
-    expiresIn: config.jwtExpiresIn as jwt.SignOptions['expiresIn'],
-  });
-};
 
 export const registerAdmin = async (req: Request, res: Response) => {
   try {
@@ -62,6 +56,56 @@ export const login = async (req: Request, res: Response) => {
     }
   } catch (error) {
     return res.status(400).json({ message: 'Invalid credentials' });
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      await user.updateOne({ token: '' });
+    }
+    return res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    return res.status(400).json({ message: 'Invalid user data' });
+  }
+};
+export const logoutChildAccount = async (req: Request, res: Response) => {
+  try {
+    const childAccount = await ChildAccount.findById(req.user._id);
+    if (childAccount) {
+      await childAccount.updateOne({ token: '' });
+    }
+    return res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    return res.status(400).json({ message: 'Invalid user data' });
+  }
+};
+
+export const loginChildAccount = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    const childAccount = await ChildAccount.findOne({ email });
+    if (childAccount && (await childAccount.comparePassword(password))) {
+      const token = generateToken(email);
+      await childAccount.updateOne({ token });
+      return res.json({
+        _id: childAccount._id,
+        name: childAccount.name,
+        email: childAccount.email,
+        role: childAccount.role,
+        token,
+      });
+    } else {
+      return res
+        .status(401)
+        .json({ message: 'Child account:: Invalid credentials' });
+    }
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ message: 'Child account:: Invalid credentials' });
   }
 };
 

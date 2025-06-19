@@ -19,6 +19,7 @@ const organizationSchema = new Schema<IOrganization>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+      unique: true,
     },
     members: [
       {

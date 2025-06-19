@@ -1,14 +1,11 @@
 import { ERole } from '@/config/constant';
+import { IUser } from '@/models/User';
+import bcrypt from 'bcryptjs';
 import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IChildAccount extends Document {
-  email: string;
-  password: string;
-  name: string;
+export interface IChildAccount extends Document, IUser {
   parentAccount: mongoose.Types.ObjectId;
   organization: mongoose.Types.ObjectId;
-  role: ERole.SALES;
-  token: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -64,6 +61,26 @@ const childAccountSchema = new Schema<IChildAccount>(
 // Indexes for faster queries
 childAccountSchema.index({ parentAccount: 1 });
 childAccountSchema.index({ organization: 1 });
+
+// Hash password before saving
+childAccountSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error: unknown) {
+    next(error as Error);
+  }
+});
+
+// Compare password method
+childAccountSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
 export const ChildAccount = mongoose.model<IChildAccount>(
   'ChildAccount',
