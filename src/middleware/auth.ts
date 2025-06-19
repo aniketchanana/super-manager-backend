@@ -6,7 +6,7 @@ import { type NextFunction, type Request, type Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 interface JwtPayload {
-  id: string;
+  email: string;
 }
 
 export const protect = async (
@@ -30,7 +30,10 @@ export const protect = async (
       token,
       config.jwtSecret as jwt.Secret
     ) as unknown as JwtPayload;
-    const user = await User.findById(decoded.id).select('-password');
+    const user = await User.findOne({
+      email: decoded.email,
+      token,
+    }).select('-password');
 
     if (!user) {
       res.status(401).json({ message: 'Not authorized, user not found' });

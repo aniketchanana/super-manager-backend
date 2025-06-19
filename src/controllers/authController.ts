@@ -4,8 +4,8 @@ import { User } from '@/models/User';
 import { type Request, type Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-const generateToken = (id: string): string => {
-  return jwt.sign({ id }, config.jwtSecret as jwt.Secret, {
+const generateToken = (email: string): string => {
+  return jwt.sign({ email }, config.jwtSecret as jwt.Secret, {
     expiresIn: config.jwtExpiresIn as jwt.SignOptions['expiresIn'],
   });
 };
@@ -19,11 +19,13 @@ export const registerAdmin = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    const token = generateToken(email);
     const user = await User.create({
       name,
       email,
       password,
       role: ERole.ADMIN,
+      token,
     });
     await user.save();
 
@@ -32,7 +34,7 @@ export const registerAdmin = async (req: Request, res: Response) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id.toString()),
+      token,
     });
   } catch (error) {
     return res.status(400).json({ message: 'Invalid user data' });
@@ -46,15 +48,17 @@ export const login = async (req: Request, res: Response) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.comparePassword(password))) {
+      const token = generateToken(email);
+      await user.updateOne({ token });
       return res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id.toString()),
+        token,
       });
     } else {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
   } catch (error) {
     return res.status(400).json({ message: 'Invalid credentials' });
