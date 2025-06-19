@@ -1,25 +1,19 @@
-import { NextFunction, Request, Response } from 'express';
+import config from '@/config/config';
+import { ERole } from '@/config/constant';
+import { User } from '@/models/User';
+import { AuthRequest } from '@/types';
+import { type NextFunction, type Request, type Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { config } from '../config/config';
-import { User } from '../models/User';
 
 interface JwtPayload {
   id: string;
 }
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: any;
-    }
-  }
-}
-
 export const protect = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     let token;
 
@@ -28,16 +22,19 @@ export const protect = async (
     }
 
     if (!token) {
-      return res.status(401).json({ message: 'Not authorized, no token' });
+      res.status(401).json({ message: 'Not authorized, no token' });
+      return;
     }
 
-    const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
+    const decoded = jwt.verify(
+      token,
+      config.jwtSecret as jwt.Secret
+    ) as unknown as JwtPayload;
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user) {
-      return res
-        .status(401)
-        .json({ message: 'Not authorized, user not found' });
+      res.status(401).json({ message: 'Not authorized, user not found' });
+      return;
     }
 
     req.user = user;
@@ -47,8 +44,12 @@ export const protect = async (
   }
 };
 
-export const admin = (req: Request, res: Response, next: NextFunction) => {
-  if (req.user && req.user.role === 'admin') {
+export const admin = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (req.user && req.user.role === ERole.ADMIN) {
     next();
   } else {
     res.status(403).json({ message: 'Not authorized as admin' });

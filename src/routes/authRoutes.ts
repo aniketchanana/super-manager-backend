@@ -1,11 +1,12 @@
+import authEndpoints from '@/config/apiEndpoints';
+import { getProfile, login, registerAdmin } from '@/controllers/authController';
+import { protect } from '@/middleware/auth';
 import express from 'express';
-import { getProfile, login, register } from '../controllers/authController';
-import { protect } from '../middleware/auth';
 
 const router = express.Router();
 
-router.post('/register', register);
-router.post('/login', login);
-router.get('/profile', protect, getProfile);
+router.post(authEndpoints.register, registerAdmin);
+router.post(authEndpoints.login, login);
+router.get(authEndpoints.profile, protect, getProfile);
 
 export default router;

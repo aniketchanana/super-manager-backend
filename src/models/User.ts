@@ -1,3 +1,4 @@
+import { ERole } from '@/config/constant';
 import bcrypt from 'bcryptjs';
 import mongoose, { Document, Schema } from 'mongoose';
 
@@ -5,7 +6,8 @@ export interface IUser extends Document {
   email: string;
   password: string;
   name: string;
-  role: 'admin' | 'user';
+  role: ERole.ADMIN;
+  token: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -30,8 +32,11 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['admin', 'user'],
-      default: 'user',
+      default: ERole.ADMIN,
+    },
+    token: {
+      type: String,
+      default: '',
     },
   },
   {
@@ -47,8 +52,8 @@ userSchema.pre('save', async function (next) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
-  } catch (error: any) {
-    next(error);
+  } catch (error: unknown) {
+    next(error as Error);
   }
 });
 
