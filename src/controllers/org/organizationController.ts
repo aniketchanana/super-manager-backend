@@ -3,11 +3,26 @@ import { ChildAccount } from '@/models/ChildAccount';
 import { Organization } from '@/models/Organization';
 import { generateToken } from '@/utils/app.utils';
 import { Request, Response } from 'express';
+import isEmpty from 'lodash/isEmpty';
 
 const createOrg = async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
-    const org = new Organization({ name, admin: req.user._id, members: [] });
+    const { name, orgId } = req.body;
+    const existingOrg = await Organization.findOne({
+      $or: [{ orgId }, { admin: req.user._id }],
+    });
+    if (existingOrg) {
+      return res.status(400).json({ message: 'Organization already exists' });
+    }
+    if (isEmpty(name) || isEmpty(orgId)) {
+      return res.status(400).json({ message: 'Name and orgId are required' });
+    }
+    const org = new Organization({
+      name,
+      orgId,
+      admin: req.user._id,
+      members: [],
+    });
     await org.save();
     return res.status(201).json(org);
   } catch (error) {
@@ -19,11 +34,10 @@ const createOrg = async (req: Request, res: Response) => {
 
 const getOrg = async (req: Request, res: Response) => {
   try {
-    const org = await Organization.find({
+    const org = await Organization.findOne({
       admin: req.user._id,
-      _id: req.params.id,
     });
-    return res.status(200).json(org);
+    return res.status(200).json(isEmpty(org) ? null : org);
   } catch (error) {
     return res
       .status(500)

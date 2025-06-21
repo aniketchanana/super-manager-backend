@@ -6,6 +6,8 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IChildAccount extends Document, IUser {
   parentAccount: mongoose.Types.ObjectId;
   organization: mongoose.Types.ObjectId;
+  phoneNumber: string;
+  address: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -24,6 +26,16 @@ const childAccountSchema = new Schema<IChildAccount>(
       type: String,
       required: true,
       minlength: 6,
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    address: {
+      type: String,
+      required: true,
+      trim: true,
     },
     name: {
       type: String,
