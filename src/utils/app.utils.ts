@@ -2,8 +2,11 @@ import config from '@/config/config';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-export const generateToken = (email: string): string => {
-  return jwt.sign({ email }, config.jwtSecret as jwt.Secret, {
+export const generateToken = (
+  email: string,
+  isChildAccount: boolean
+): string => {
+  return jwt.sign({ email, isChildAccount }, config.jwtSecret as jwt.Secret, {
     expiresIn: config.jwtExpiresIn as jwt.SignOptions['expiresIn'],
   });
 };

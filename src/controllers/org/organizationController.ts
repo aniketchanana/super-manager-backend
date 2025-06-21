@@ -34,8 +34,9 @@ const createOrg = async (req: Request, res: Response) => {
 const getOrg = async (req: Request, res: Response) => {
   try {
     const org = await Organization.findOne({
-      admin: req.user._id,
+      admin: req.isChildAccount ? req.user.parentAccount : req.user._id,
     });
+
     return res.status(200).json(isEmpty(org) ? null : org);
   } catch (error) {
     return res
@@ -67,7 +68,7 @@ const addNewMemberToOrg = async (req: Request, res: Response) => {
   try {
     const { member, organizationId } = req.body;
 
-    const token = generateToken(member.email);
+    const token = generateToken(member.email, true);
     const childAccount = await ChildAccount.create({
       name: member.name,
       email: member.email,

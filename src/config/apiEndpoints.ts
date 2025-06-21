@@ -5,7 +5,6 @@ export const authEndpoints = {
   login: '/login',
   loginChildAccount: '/login-child-account',
   logout: '/logout',
-  logoutChildAccount: '/logout-child-account',
 };
 
 export const orgEndpoints = {

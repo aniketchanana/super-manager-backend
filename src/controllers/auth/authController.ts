@@ -13,7 +13,7 @@ export const registerAdmin = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const token = generateToken(email);
+    const token = generateToken(email, false);
     const user = await User.create({
       name,
       email,
@@ -42,7 +42,7 @@ export const login = async (req: Request, res: Response) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.comparePassword(password))) {
-      const token = generateToken(email);
+      const token = generateToken(email, false);
       await user.updateOne({ token });
       return res.json({
         _id: user._id,
@@ -61,20 +61,11 @@ export const login = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await (req.isChildAccount
+      ? ChildAccount.findById(req.user._id)
+      : User.findById(req.user._id));
     if (user) {
       await user.updateOne({ token: '' });
-    }
-    return res.status(200).json({ message: 'Logged out successfully' });
-  } catch (error) {
-    return res.status(400).json({ message: 'Invalid user data' });
-  }
-};
-export const logoutChildAccount = async (req: Request, res: Response) => {
-  try {
-    const childAccount = await ChildAccount.findById(req.user._id);
-    if (childAccount) {
-      await childAccount.updateOne({ token: '' });
     }
     return res.status(200).json({ message: 'Logged out successfully' });
   } catch (error) {
@@ -92,7 +83,7 @@ export const loginChildAccount = async (req: Request, res: Response) => {
       childAccount.isActive &&
       (await childAccount.comparePassword(password))
     ) {
-      const token = generateToken(email);
+      const token = generateToken(email, true);
       await childAccount.updateOne({ token });
       return res.json({
         _id: childAccount._id,
@@ -118,7 +109,9 @@ export const getProfile = async (
   res: Response
 ): Promise<void> => {
   try {
-    const user = await User.findById(req.user._id).select('-password');
+    const user = await (req.isChildAccount
+      ? ChildAccount.findById(req.user._id)
+      : User.findById(req.user._id).select('-password'));
     if (user) {
       res.json(user);
     } else {
