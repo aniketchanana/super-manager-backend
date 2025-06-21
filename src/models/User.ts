@@ -1,4 +1,5 @@
 import { ERole } from '@/config/constant';
+import { hashPassword } from '@/utils/app.utils';
 import bcrypt from 'bcryptjs';
 import mongoose, { Document, Schema } from 'mongoose';
 
@@ -49,8 +50,7 @@ userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    this.password = await hashPassword(this.password);
     next();
   } catch (error: unknown) {
     next(error as Error);

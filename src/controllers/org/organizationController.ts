@@ -1,7 +1,6 @@
-import { ERole } from '@/config/constant';
 import { ChildAccount } from '@/models/ChildAccount';
 import { Organization } from '@/models/Organization';
-import { generateToken } from '@/utils/app.utils';
+import { generateToken, hashPassword } from '@/utils/app.utils';
 import { Request, Response } from 'express';
 import isEmpty from 'lodash/isEmpty';
 
@@ -73,9 +72,11 @@ const addNewMemberToOrg = async (req: Request, res: Response) => {
       name: member.name,
       email: member.email,
       password: member.password,
+      phoneNumber: member.phoneNumber,
+      address: member.address,
       parentAccount: req.user._id,
       organization: organizationId,
-      role: ERole.SALES,
+      role: member.role,
       token,
       isActive: true,
     });
@@ -85,11 +86,24 @@ const addNewMemberToOrg = async (req: Request, res: Response) => {
       { $push: { members: childAccount._id } },
       { new: true }
     );
-    return res.status(200).json(org);
+    return res.status(200).json({ org, childAccount });
   } catch (error) {
     return res
       .status(500)
       .json({ message: 'Something went wrong, unable to add member' });
+  }
+};
+
+const getAllOrgMembers = async (req: Request, res: Response) => {
+  try {
+    const members = await ChildAccount.find({
+      organization: req.params.orgId,
+    }).select('-password -token');
+    return res.status(200).json(members);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: 'Something went wrong, unable to get all org members' });
   }
 };
 
@@ -109,4 +123,32 @@ const deactivateMember = async (req: Request, res: Response) => {
   }
 };
 
-export { addNewMemberToOrg, createOrg, deactivateMember, getOrg, updateOrg };
+const updateOrgMember = async (req: Request, res: Response) => {
+  try {
+    const { memberId } = req.params;
+    const updates = req.body;
+    if (updates.password) {
+      updates.password = await hashPassword(updates.password);
+    }
+    const updatedMember = await ChildAccount.findByIdAndUpdate(
+      memberId,
+      updates,
+      { new: true }
+    ).select('-password -token');
+    return res.status(200).json(updatedMember);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: 'Something went wrong, unable to update member' });
+  }
+};
+
+export {
+  addNewMemberToOrg,
+  createOrg,
+  deactivateMember,
+  getAllOrgMembers,
+  getOrg,
+  updateOrg,
+  updateOrgMember,
+};

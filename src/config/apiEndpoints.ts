@@ -15,4 +15,6 @@ export const orgEndpoints = {
   get: '/get',
   addMember: '/addMember',
   deactivateMember: '/deactivateMember',
+  getAllMembers: '/getAllMembers/:orgId',
+  updateMember: '/updateMember/:memberId',
 };

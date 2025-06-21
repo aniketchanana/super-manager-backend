@@ -87,7 +87,11 @@ export const loginChildAccount = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     const childAccount = await ChildAccount.findOne({ email });
-    if (childAccount && (await childAccount.comparePassword(password))) {
+    if (
+      childAccount &&
+      childAccount.isActive &&
+      (await childAccount.comparePassword(password))
+    ) {
       const token = generateToken(email);
       await childAccount.updateOne({ token });
       return res.json({
