@@ -1,8 +1,13 @@
-import { authEndpoints, orgEndpoints } from '@/config/apiEndpoints';
+import {
+  authEndpoints,
+  orgEndpoints,
+  productEndpoints,
+} from '@/config/apiEndpoints';
 import config from '@/config/config';
 import connectDB from '@/config/database';
 import authRoutes from '@/routes/authRoutes';
 import orgRoutes from '@/routes/organizationRoutes';
+import productRoutes from '@/routes/productRoutes';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
@@ -40,6 +45,7 @@ app.use(helmet());
 // Routes
 app.use(authEndpoints.root, authRoutes);
 app.use(orgEndpoints.root, orgRoutes);
+app.use(productEndpoints.root, productRoutes);
 
 // Basic route
 app.get('/', (_req, res) => {
