@@ -1,6 +1,7 @@
 import { ERole } from '@/config/constant';
 import { Organization } from '@/models/Organization';
 import { Product } from '@/models/Product';
+import { generateShortId } from '@/utils/app.utils';
 import { Request, Response } from 'express';
 
 export const createProduct = async (req: Request, res: Response) => {
@@ -41,6 +42,7 @@ export const createProduct = async (req: Request, res: Response) => {
       costPrice,
       minRetailPrice,
       maxRetailPrice,
+      shortId: generateShortId(),
       quantity,
       productDescription: productDescription || '',
       imageUrl: imageUrl || '',
@@ -51,9 +53,7 @@ export const createProduct = async (req: Request, res: Response) => {
     return res.status(201).json(product);
   } catch (error) {
     return res.status(500).json({
-      success: false,
-      message: 'Failed to create product',
-      error: (error as Error).message,
+      message: (error as Error).message,
     });
   }
 };
@@ -95,6 +95,7 @@ export const getProducts = async (req: Request, res: Response) => {
         : req.user.organization;
     const products = await Product.find({
       organizationId,
+      isDeleted: false,
     }).select(`${req.user.role !== ERole.ADMIN ? '-costPrice' : ''}`);
     res.status(200).json(products);
   } catch (error) {
@@ -110,8 +111,11 @@ export const getProducts = async (req: Request, res: Response) => {
 export const getProductById = async (req: Request, res: Response) => {
   try {
     const { productId } = req.params;
-    const product = await Product.findById(productId);
-    res.status(200).json(product);
+    const product = await Product.findOne({
+      _id: productId,
+      isDeleted: false,
+    }).select(`${req.user.role !== ERole.ADMIN ? '-costPrice' : ''}`);
+    res.status(200).json(product || null);
   } catch (error) {
     res.status(500).json({
       success: false,

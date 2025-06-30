@@ -9,6 +9,8 @@ export interface IProduct extends Document {
   quantity: number;
   productDescription?: string;
   imageUrl?: string;
+  shortId: string;
+  isDeleted: boolean;
   organizationId: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -34,6 +36,8 @@ const ProductSchema = new Schema<IProduct>({
     ref: 'User',
     required: true,
   },
+  shortId: { type: String, required: true, unique: true },
+  isDeleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

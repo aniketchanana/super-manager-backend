@@ -22,7 +22,8 @@
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.21",
-    "mongoose": "^7.0.3"
+    "mongoose": "^7.0.3",
+    "shortid": "^2.2.17"
   },
   "devDependencies": {
     "@eslint/js": "^8.56.0",
@@ -33,6 +34,7 @@
     "@types/lodash": "^4.17.18",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^18.15.11",
+    "@types/shortid": "^2.2.0",
     "eslint": "^8.56.0",
     "eslint-import-resolver-typescript": "^4.4.3",
     "eslint-plugin-import": "^2.31.0",
