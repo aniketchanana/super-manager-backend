@@ -124,3 +124,41 @@ export const getProductById = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const markProductAsSold = async (req: Request, res: Response) => {
+  try {
+    const { productId } = req.params;
+
+    const existingProduct = await Product.findById(productId);
+
+    if (!existingProduct) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found',
+      });
+    }
+
+    if (existingProduct.quantity === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Product is out of stock',
+      });
+    }
+
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      {
+        quantity: existingProduct.quantity - 1,
+      },
+      { new: true }
+    );
+
+    return res.status(200).json(product);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to mark product as sold',
+      error: (error as Error).message,
+    });
+  }
+};

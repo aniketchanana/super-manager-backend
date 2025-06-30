@@ -24,4 +24,5 @@ export const productEndpoints = Object.freeze({
   update: '/update/:productId',
   getAllProducts: '/getAllProducts',
   getProductById: '/getProductById/:productId',
+  markProductAsSold: '/markProductAsSold/:productId',
 });

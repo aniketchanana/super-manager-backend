@@ -3,6 +3,7 @@ import {
   createProduct,
   getProductById,
   getProducts,
+  markProductAsSold,
   updateProduct,
 } from '@/controllers/product/productController';
 import { onlyForAdmin, protect } from '@/middleware/auth';
@@ -14,5 +15,6 @@ router.post(productEndpoints.add, protect, onlyForAdmin, createProduct);
 router.patch(productEndpoints.update, protect, onlyForAdmin, updateProduct);
 router.get(productEndpoints.getAllProducts, protect, getProducts);
 router.get(productEndpoints.getProductById, protect, getProductById);
+router.patch(productEndpoints.markProductAsSold, protect, markProductAsSold);
 
 export default router;
