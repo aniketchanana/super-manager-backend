@@ -23,20 +23,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const allowedOrigins = [
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:5173'
-    : 'https://super-manager-phi.vercel.app',
-];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+    origin: function (_origin, callback) {
+      callback(null, true);
     },
     credentials: true,
   })
@@ -59,5 +49,5 @@ app.get('/', (_req, res) => {
 const PORT = config.port;
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server started on port ${PORT}`);
 });
