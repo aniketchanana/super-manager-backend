@@ -25,12 +25,12 @@ RUN chown -R appuser:appuser /app
 # Switch to the non-root user
 USER appuser
 
-# Expose the port (default to 3000 if not specified)
-EXPOSE ${PORT:-3000}
+# Expose the port (default to 8000 if not specified)
+EXPOSE ${PORT:-8000}
 
 # Health check to ensure the container is running properly
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-3000}/ || exit 1
+    CMD curl -f http://localhost:${PORT:-8000}/ || exit 1
 
 # Set environment variables
 ENV NODE_ENV=production
