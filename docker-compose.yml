@@ -19,7 +19,7 @@ services:
 
   # Node.js application service
   app:
-    build: .
+    image: super-manager-backend:latest
     container_name: super-manager-backend
     restart: unless-stopped
     ports:
@@ -34,10 +34,6 @@ services:
       - mongodb
     networks:
       - super-manager-network
-    volumes:
-      # Optional: Mount for development
-      - .:/app
-      - /app/node_modules
 
   # Frontend application service
   frontend:
@@ -54,9 +50,7 @@ services:
       - app
     networks:
       - super-manager-network
-    volumes:
-      - /app/node_modules
-
+      
 volumes:
   mongodb_data:
 
