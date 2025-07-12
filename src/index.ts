@@ -12,6 +12,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import helmet from 'helmet';
+import path from 'path';
 
 dotenv.config();
 
@@ -35,6 +36,12 @@ app.use(
 app.options('*', cors());
 
 app.use(helmet());
+
+// Serve static files from public directory
+app.use(
+  '/uploads',
+  express.static(path.join(process.cwd(), 'public', 'uploads'))
+);
 
 // Routes
 app.use(authEndpoints.root, authRoutes);

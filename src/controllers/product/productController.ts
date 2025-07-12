@@ -1,8 +1,71 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ERole } from '@/config/constant';
 import { Organization } from '@/models/Organization';
 import { Product } from '@/models/Product';
 import { generateShortId } from '@/utils/app.utils';
 import { Request, Response } from 'express';
+import fs from 'fs';
+import multer from 'multer';
+import path from 'path';
+
+// Configure multer for image uploads
+const storage = multer.diskStorage({
+  destination: (_req: any, _file: any, cb: any) => {
+    const uploadPath = path.join(process.cwd(), 'public', 'uploads');
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: (_req: any, file: any, cb: any) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const fileExtension = path.extname(file.originalname);
+    cb(null, 'product-' + uniqueSuffix + fileExtension);
+  },
+});
+
+const fileFilter = (_req: unknown, file: any, cb: any) => {
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed!'), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+  },
+});
+
+export const uploadProductImage = upload.single('image');
+
+export const handleImageUpload = async (req: any, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No image file provided',
+      });
+    }
+
+    const imageUrl = `/uploads/${req.file.filename}`;
+
+    return res.status(200).json({
+      success: true,
+      message: 'Image uploaded successfully',
+      imageUrl: imageUrl,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to upload image',
+      error: (error as Error).message,
+    });
+  }
+};
 
 export const createProduct = async (req: Request, res: Response) => {
   try {

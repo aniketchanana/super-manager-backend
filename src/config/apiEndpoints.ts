@@ -25,4 +25,5 @@ export const productEndpoints = Object.freeze({
   getAllProducts: '/getAllProducts',
   getProductById: '/getProductById/:productId',
   markProductAsSold: '/markProductAsSold/:productId',
+  uploadImage: '/uploadImage',
 });
