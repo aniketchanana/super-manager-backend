@@ -40,6 +40,10 @@ app.use(helmet());
 // Serve static files from public directory
 app.use(
   '/uploads',
+  (_req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  },
   express.static(path.join(process.cwd(), 'public', 'uploads'))
 );
 
