@@ -1,6 +1,6 @@
 {
   "name": "super-manager-backend",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Backend for Super Manager application",
   "main": "dist/index.js",
   "scripts": {
